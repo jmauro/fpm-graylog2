@@ -1,10 +1,10 @@
 class Graylog2Web < FPM::Cookery::Recipe
   description 'Web dashboard for Graylog2 - open source log management solution that stores your logs in ElasticSearch.'
   name        'graylog2-web'
-  version     '0.9.6p1RC1'
+  version     '0.9.6p1'
   revision    '3'
   homepage    'http://graylog2.org'
-  source      'https://github.com/downloads/Graylog2/graylog2-web-interface/graylog2-web-interface-0.9.6p1-RC1.tar.gz'
+  source      'https://github.com/downloads/Graylog2/graylog2-web-interface/graylog2-web-interface-0.9.6p1.tar.gz'
   md5         '1235c5ccf3d9cf2b3d92f27702bce60d'
   arch        'all'
   section     'admin'

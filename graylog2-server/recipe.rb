@@ -18,21 +18,28 @@ class Graylog2Server < FPM::Cookery::Recipe
 
   config_files '/etc/graylog2.conf'
 
+  # --[ Changing default setup directory ]--
+  def prefix (path = nil)
+	  opt/'graylog2-server'/path
+  end
+
   def build
     inreplace 'bin/graylog2ctl' do |s|
       s.gsub! '../graylog2-server.jar', share('graylog2-server/graylog2-server.jar')
     end
 
-    inline_replace 'graylog2.conf.example' do |s|
-      s.gsub! 'mongodb_useauth = true', 'mongodb_useauth = false'
-    end
+# --[ Mopngodb uses auth ]--
+#    inline_replace 'graylog2.conf.example' do |s|
+#      s.gsub! 'mongodb_useauth = true', 'mongodb_useauth = false'
+#    end
+    
   end
 
   def install
     bin.install 'bin/graylog2ctl'
     etc('init.d').install_p workdir('graylog2-server.init'), 'graylog2-server'
     etc.install_p 'graylog2.conf.example', 'graylog2.conf'
-    share('graylog2-server').install 'build_date'
-    share('graylog2-server').install 'graylog2-server.jar'
+    lib.install 'build_date'
+    lib.install 'graylog2-server.jar'
   end
 end
