@@ -49,10 +49,6 @@ DAEMON_ARGS="-jar ${DAEMON} -f /etc/graylog2.conf"
 #
 do_start()
 {
-	if [[ "$1" = "debug" ]]; then
-		DAEMON_ARGS="--debug ${DAEMON_ARGS}"
-	fi
-
 	log_action_msg "Starting starting process of ${DESC}"
 	# Return
 	#	0 if daemon has been started
@@ -76,6 +72,12 @@ do_start()
 		2)	[ "${VERBOSE}" != no ] && log_end_msg 1 ;;
 	esac
 	return ${RETVAL}
+}
+
+do_debug()
+{
+	log_action_msg "Starting starting process '${NAME}' in debug mode"
+	${JAVA_CMD} --debug ${DAEMON_ARGS} | tee /tmp/graylog2-server.log &
 }
 
 #
@@ -121,7 +123,7 @@ do_reload() {
 do_status() {
 	pgrep -f "${JAVA_CMD} ${DAEMON_ARGS}" > /dev/null 2>&1
 	status="$?"
-	if [ "${status}" = 1 ]; then
+	if [ "${status}" = 0 ]; then
 		log_success_msg "${NAME} is running"
 		return 0
 	else
@@ -162,7 +164,7 @@ case "$1" in
 		do_status
 		;;
 	debug)
-		do_start debug
+		do_debug
 		;;
 	restart|reload|force-reload)
 		#
