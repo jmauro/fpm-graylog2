@@ -20,10 +20,11 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Syslog server"
-NAME=graylog2-server
-GRAYLOG2_SERVER_HOME=/opt/graylog2-server/lib
-PIDFILE=/var/run/${NAME}.pid
-SCRIPTNAME=/etc/init.d/${NAME}
+NAME="graylog2-server"
+GRAYLOG2_SERVER_HOME="/opt/graylog2-server/lib"
+PIDFILE="/var/run/${NAME}.pid"
+SCRIPTNAME="/etc/init.d/${NAME}"
+DEBUG_FILE="/tmp/graylog2-debug.log"
 JAVA_CMD="$(which java)"
 
 # Read configuration variable file if it is present
@@ -77,7 +78,9 @@ do_start()
 do_debug()
 {
 	log_action_msg "Starting starting process '${NAME}' in debug mode"
-	${JAVA_CMD} --debug ${DAEMON_ARGS} | tee /tmp/graylog2-server.log &
+	${JAVA_CMD} ${DAEMON_ARGS} --debug > ${DEBUG_FILE} 2>&1 &
+	echo $! > ${PIDFILE}
+	log_action_msg "Check 'tailf ${DEBUG_FILE}'..."
 }
 
 #
