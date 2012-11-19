@@ -86,10 +86,14 @@ check_user_connection ()
 		DB='admin'
 	fi
 
-	mongo "${DB}" <<-_EOF
-	db.auth('${USER}', '${USER_PASSWD}')
-	db.stats()
-	_EOF
+	if [ -x "/usr/bin/mongo" ]; then
+		mongo "${DB}" <<-_EOF
+		db.auth('${USER}', '${USER_PASSWD}')
+		db.stats()
+		_EOF
+	else
+		echo "Error: mongodb is not installed"
+	fi
 }	# ----------  end of function check_user_connection  ----------
 
 user_is_declared ()
@@ -126,13 +130,18 @@ create_mongodb_user ()
 	else
 		unset ADDUSER
 	fi
-	mongo admin <<-_EOF
-	${ADDUSER}
-	db.auth('${ADMIN}','${ADMIN_PASSWD}')
-	use ${DB}
-	db.addUser('${USER}', '${USER_PASSWD}')
-	_EOF
-	return 0
+
+	if [ -x "/usr/bin/mongo" ]; then
+		mongo admin <<-_EOF
+		${ADDUSER}
+		db.auth('${ADMIN}','${ADMIN_PASSWD}')
+		use ${DB}
+		db.addUser('${USER}', '${USER_PASSWD}')
+		_EOF
+		return 0
+	else
+		return 1
+	fi
 }	# ----------  end of function create_mongodb_user  ----------
 
 #=============================
