@@ -212,5 +212,9 @@ do
 	esac
 done
 
+if [ -z "${FUNC}" ];then
+	usage
+fi
+
 ${FUNC} "${USER}" "${PASSWORD}" "${DB}" "${ADMIN}" "${ADMIN_PASSWD}" > /dev/null 2>&1
 exit $?

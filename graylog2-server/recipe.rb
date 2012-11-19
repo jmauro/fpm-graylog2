@@ -18,6 +18,11 @@ class Graylog2Server < FPM::Cookery::Recipe
 
   config_files '/etc/graylog2.conf'
 
+  # --[ Scripts ]--
+  pre_uninstall  'pre-uninstall'
+  post_uninstall  'post-uninstall'
+
+
   # --[ Changing default setup directory ]--
   def prefix (path = nil)
 	  opt/'graylog2-server'/path

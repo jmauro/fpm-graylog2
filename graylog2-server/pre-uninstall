@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+SERVICE='graylog2-server'
+
+case "$1" in
+	remove)
+		# --[ First stop service ]
+		[ -x /usr/sbin/invoke-rc.d ] && /usr/sbin/invoke-rc.d ${SERVICE} stop
+		[ -x /sbin/service ] && /sbin/service ${SERVICE} stop
+
+		# --[ Then remove service ]--
+		[ -x /sbin/insserv ] && /sbin/insserv -r ${SERVICE}
+		[ -x /sbin/chkconfig ] && /sbin/chkconfig -del ${SERVICE} > /dev/null
+		;;
+	purge)
+		rm -f /var/log/graylog2.*
+		;;
+
+	upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+		;;
+
+	*)
+		echo "$0 called with unknown argument \`$1'" >&2
+		exit 1
+		;;
+esac
