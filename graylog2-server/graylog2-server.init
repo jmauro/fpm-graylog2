@@ -165,6 +165,7 @@ case "$1" in
 		;;
 	status)
 		do_status
+		exit $?
 		;;
 	debug)
 		do_debug
