@@ -41,6 +41,7 @@ class Graylog2Server < FPM::Cookery::Recipe
   end
 
   def install
+    FileUtils.chown_R '0', '0', '.'
     etc('init.d').install_p workdir('graylog2-server.init'), 'graylog2-server'
     share.install_p workdir('mongodb_user.sh'), 'mongodb_user.sh'
 
