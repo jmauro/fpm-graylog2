@@ -54,14 +54,14 @@ export PATH
 usage ()
 {
 	echo
-	echo " Syntax: $0 check  -u|--user USERNAME -p|--password PASSWD -db|--database DB"
-	echo " 		  create -u|--user USERNAME -p|--password PASSWD -db|--database DB -r|--root ADMIN_USER -rp|--root-password ADMIN_PASSWORD"
+	echo " Syntax: $0 check  -u|--user USERNAME -p|--password PASSWD -db|--database DB [-h|--host HOST]"
+	echo " 		  create -u|--user USERNAME -p|--password PASSWD -db|--database DB [-h|--host HOST] -r|--root ADMIN_USER -rp|--root-password ADMIN_PASSWORD"
 	echo
 	echo " Example:"
-	echo "		$0 check  -u graylog2 -p '1234' -db graylog2"
-	echo "		$0 create -u graylog2 -p '1234' -db graylog2 -r admin -rp 'admin1234'"
+	echo "		$0 check  -u graylog2 -p '1234' -db graylog2 -h localhost"
+	echo "		$0 create -u graylog2 -p '1234' -db graylog2 -h localhost -r admin -rp 'admin1234'"
 	echo
-	echo " Note: all options are mandatory"
+	echo " Note: all options are mandatory except HOST (default: localhost)"
 	echo
 	exit 1
 }	
@@ -79,15 +79,19 @@ check_user_connection ()
 	USER="$1"
 	USER_PASSWD="$2"
 	DB="$3"
+	HOST="$4"
 	if [ -z "${USER}" ] || [ -z "${USER_PASSWD}" ]; then
 		usage
 	fi
 	if [ -z "${DB}" ]; then
 		DB='admin'
 	fi
+	if [ -z "${HOST}" ]; then
+		HOST="localhost"
+	fi
 
 	if [ -x "/usr/bin/mongo" ]; then
-		mongo "${DB}" <<-_EOF
+		mongo --host "${HOST}" "${DB}" <<-_EOF
 		db.auth('${USER}', '${USER_PASSWD}')
 		db.stats()
 		_EOF
@@ -120,9 +124,14 @@ create_mongodb_user ()
 	DB="$3"
 	ADMIN="$4"
 	ADMIN_PASSWD="$5"
+	HOST="$6"
 	if [ -z "${USER}" ] || [ -z "${USER_PASSWD}" ] || [ -z "${DB}" ] || [ -z "${ADMIN}" ] || [ -z "${ADMIN_PASSWD}" ]; then
 		usage
 	fi
+	if [ -z "${HOST}" ]; then
+		HOST="localhost"
+	fi
+
 	# --[ Check if user 'ADMIN' is needed ]--
 	user_is_declared "${ADMIN}" "${ADMIN_PASSWD}" admin
 	if [ $? -ne 0 ]; then
@@ -132,7 +141,7 @@ create_mongodb_user ()
 	fi
 
 	if [ -x "/usr/bin/mongo" ]; then
-		mongo admin <<-_EOF
+		mongo --host "${HOST}" admin <<-_EOF
 		${ADDUSER}
 		db.auth('${ADMIN}','${ADMIN_PASSWD}')
 		use ${DB}
@@ -183,6 +192,9 @@ do
 					ADMIN_PASSWD="$1"
 					shift
 					;;
+				host)
+					HOST="$1"
+					;;
 				*)
 					usage
 					;;
@@ -210,6 +222,9 @@ do
 					ADMIN_PASSWD="$1"
 					shift
 					;;
+				h)
+					HOST="$1"
+					;;
 				*)
 					usage
 					;;
@@ -225,5 +240,5 @@ if [ -z "${FUNC}" ];then
 	usage
 fi
 
-${FUNC} "${USER}" "${PASSWORD}" "${DB}" "${ADMIN}" "${ADMIN_PASSWD}" > /dev/null 2>&1
+${FUNC} "${USER}" "${PASSWORD}" "${DB}" "${ADMIN}" "${ADMIN_PASSWD}" "${HOST}" > /dev/null 2>&1
 exit $?
