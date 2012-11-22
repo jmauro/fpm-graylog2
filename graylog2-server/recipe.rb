@@ -2,7 +2,7 @@ class Graylog2Server < FPM::Cookery::Recipe
   description 'Graylog2 is an open source log management solution that stores your logs in ElasticSearch.'
   name        'graylog2-server'
   version     '0.9.6p1'
-  revision    '1'
+  revision    '2'
   homepage    'http://graylog2.org'
   source      'https://github.com/downloads/Graylog2/graylog2-server/graylog2-server-0.9.6p1.tar.gz'
   md5         '499ae16dcae71eeb7c3a30c75ea7a1a6'

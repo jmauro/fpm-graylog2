@@ -102,6 +102,17 @@ check_user_connection ()
 
 user_is_declared ()
 {
+	# checking open port on http admin port
+	local count=0
+	while [ $count -lt 10 ]
+	do
+		# --[ Default port pour http admin ]--
+		lsof -i :28017 > /dev/null 2>&1
+		[ $? -eq 0 ] && break
+		sleep 1
+		count=$(($count+1))
+	done
+	[ $count -eq 10 ] && return 1
 	check_user_connection $@ 2>&1 | grep "Error:" > /dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		return 0
@@ -141,13 +152,17 @@ create_mongodb_user ()
 	fi
 
 	if [ -x "/usr/bin/mongo" ]; then
-		mongo --host "${HOST}" admin <<-_EOF
+		mongo --host "${HOST}" admin <<-_EOF> /tmp/mongo_create
 		${ADDUSER}
 		db.auth('${ADMIN}','${ADMIN_PASSWD}')
 		use ${DB}
 		db.addUser('${USER}', '${USER_PASSWD}')
 		_EOF
-		return 0
+		if $(grep -i "error" /tmp/mongo_create >/dev/null 2>&1 ); then
+			return 1
+		else
+			return 0
+		fi
 	else
 		return 1
 	fi
@@ -240,5 +255,5 @@ if [ -z "${FUNC}" ];then
 	usage
 fi
 
-${FUNC} "${USER}" "${PASSWORD}" "${DB}" "${ADMIN}" "${ADMIN_PASSWD}" "${HOST}" > /dev/null 2>&1
+${FUNC} "${USER}" "${PASSWORD}" "${DB}" "${ADMIN}" "${ADMIN_PASSWD}" "${HOST}"
 exit $?
